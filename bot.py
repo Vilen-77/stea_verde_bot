@@ -20,7 +20,7 @@ async def semantics(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",
+            model="gpt-4-turbo",
             messages=[{"role": "user", "content": prompt}]
         )
         result = response.choices[0].message.content.strip()
