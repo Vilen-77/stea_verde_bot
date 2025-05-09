@@ -1,51 +1,76 @@
+from telegram import Update
+from telegram.ext import CommandHandler, ContextTypes
 import os
-import re
 import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+from handlers.meta_extractor import fetch_meta, extract_keywords, save_to_file
 
-# Папка для сохранения файлов
-SAVE_DIR = "serp_cache"
-os.makedirs(SAVE_DIR, exist_ok=True)
+# Получаем ключ из переменных окружения
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 
-def fetch_meta(url):
+# Разбор аргументов команды: +N, L, R
+def parse_serp_args(args):
+    query_parts = []
+    count = 10  # по умолчанию
+    lang = "ro"
+    region = "ro"
+
+    for arg in args:
+        if arg.startswith('+') and arg[1:].isdigit():
+            count += int(arg[1:])
+        elif arg.lower().startswith('l='):
+            lang = arg[2:]
+        elif arg.lower().startswith('r='):
+            region = arg[2:]
+        else:
+            query_parts.append(arg)
+
+    return ' '.join(query_parts), count, lang, region
+
+# Команда /serp
+async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("Пожалуйста, укажите поисковый запрос после /serp")
+        return
+
+    query, count, lang, region = parse_serp_args(context.args)
+    await update.message.reply_text(f"🔍 Ищу: *{query}*\n🌐 Язык: {lang}, Регион: {region}\n📦 Результатов: {count}", parse_mode="Markdown")
+
+    params = {
+        "engine": "google",
+        "q": query,
+        "api_key": SERPAPI_KEY,
+        "hl": lang,
+        "gl": region
+    }
+
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(resp.text, "html.parser")
+        response = requests.get("https://serpapi.com/search", params=params)
+        data = response.json()
+        results = data.get("organic_results", [])[:count]
 
-        title = soup.title.string.strip() if soup.title else ""
-        description = soup.find("meta", attrs={"name": "description"})
-        description = description["content"].strip() if description and description.has_attr("content") else ""
-        keywords = soup.find("meta", attrs={"name": "keywords"})
-        keywords = keywords["content"].strip() if keywords and keywords.has_attr("content") else ""
+        if not results:
+            await update.message.reply_text("❌ Результаты не найдены.")
+            return
 
-        return title, description, keywords
+        message = "📄 *Топ результатов:*
+\n"
+
+        for idx, res in enumerate(results, start=1):
+            title = res.get("title", f"Результат {idx}")
+            link = res.get("link", "")
+            message += f"• [{title}]({link})\n"
+
+            # Извлекаем и сохраняем мета-данные
+            page_title, description, meta_keywords = fetch_meta(link)
+            combined_text = f"{page_title} {description} {meta_keywords}"
+            keywords = extract_keywords(combined_text)
+            save_to_file(query, link, keywords)
+
+        await update.message.reply_text(message, parse_mode="Markdown", disable_web_page_preview=True)
 
     except Exception as e:
-        print(f"❌ Ошибка при получении мета-данных с {url}: {e}")
-        return "", "", ""
+        print("❌ Ошибка запроса к SerpAPI:", e)
+        await update.message.reply_text("⚠️ Не удалось получить результаты из SerpAPI.")
 
-def extract_keywords(text):
-    words = re.findall(r"\b[\w\-]{3,}\b", text.lower())
-    return sorted(set(words))
-
-def sanitize_filename(text):
-    return re.sub(r"[^a-zA-Z0-9_-]", "_", text)[:50]
-
-def save_to_file(user_query, url, keywords):
-    try:
-        domain = urlparse(url).netloc.replace("www.", "")
-        main_kw = user_query.split()[0].lower()
-        filename = f"{main_kw}-{sanitize_filename(domain)}.txt"
-        filepath = os.path.join(SAVE_DIR, filename)
-
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(f"URL: {url}\n")
-            for kw in keywords:
-                f.write(f"{kw}\n")
-
-        return filepath
-    except Exception as e:
-        print(f"❌ Ошибка при сохранении файла: {e}")
-        return None
+# Хендлер команды
+handler = CommandHandler("serp", serp_command)
