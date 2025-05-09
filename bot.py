@@ -35,9 +35,7 @@ async def on_startup():
     print("🚀 Устанавливаю webhook:", WEBHOOK_URL)
     await tg_app.bot.set_webhook(url=WEBHOOK_URL)
 
-# Упрощённый webhook для отладки
-from telegram import Update
-
+#  webhook
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     print("🧪 Вход в обработчик /webhook")
