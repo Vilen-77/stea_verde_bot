@@ -5,6 +5,9 @@ from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, Application
 
+print("📦 TELEGRAM_TOKEN:", TELEGRAM_TOKEN[:10], "...")
+print("🌐 RENDER_EXTERNAL_HOSTNAME:", RENDER_EXTERNAL_HOSTNAME)
+
 # Хендлеры
 from handlers.start import handler as start_handler
 # from handlers.semantics import handler as semantics_handler
