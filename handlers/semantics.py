@@ -8,7 +8,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Загрузка шаблона prompt из файла
-PROMPT_TEMPLATE_PATH = "prompts/prompt_semantics.txt"
+PROMPT_TEMPLATE_PATH = "prompt_templates/prompt_semantics.txt"
 if os.path.exists(PROMPT_TEMPLATE_PATH):
     with open(PROMPT_TEMPLATE_PATH, "r", encoding="utf-8") as f:
         PROMPT_TEMPLATE = f.read()
