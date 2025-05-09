@@ -47,5 +47,11 @@ async def telegram_webhook(request: Request):
         print("❌ Ошибка чтения webhook:", str(e))
         return {"status": "error", "message": str(e)}
 
-
 print("✅ Бот запущен через Webhook")
+
+# Обязательный запуск через uvicorn для Render Web Service
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))
+    print(f"🚪 Запускаю Uvicorn на порту {port}...")
+    uvicorn.run("bot:app", host="0.0.0.0", port=port)
