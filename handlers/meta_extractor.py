@@ -9,8 +9,9 @@ SAVE_DIR = "serp_cache"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 def fetch_meta(url):
-    print(f"📄 Получаю мета-данные с: {url}")
     try:
+        print(f"📄 Получаю мета-данные с: {url}")
+
         headers = {"User-Agent": "Mozilla/5.0"}
         resp = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(resp.text, "html.parser")
@@ -37,30 +38,25 @@ def fetch_meta(url):
 
     except Exception as e:
         print(f"❌ Ошибка при получении мета-данных с {url}: {e}")
-        return {
-            "url": url,
-            "title": "",
-            "description": "",
-            "keywords": "",
-            "og_title": "",
-            "og_description": ""
-        }
+        return {"url": url, "title": "", "description": "", "keywords": "", "og_title": "", "og_description": ""}
 
 def sanitize_filename(text):
-    return re.sub(r"[^a-zA-Z0-9_-]", "_", text)[:50]
+    return re.sub(r"[^a-zA-Z0-9_-]", "_", text)[:80]
 
 def save_raw_meta(user_query, meta_dict):
-    print(f"💾 Сохраняю файл для запроса: {user_query}")
-    print(f"→ META: {meta_dict}")
     try:
+        print(f"💾 Сохраняю файл для запроса: {user_query}")
+        print(f"→ META: {meta_dict}")
+
         domain = urlparse(meta_dict["url"]).netloc.replace("www.", "")
-        main_kw = user_query.split()[0].lower()
-        filename = f"{main_kw}-{sanitize_filename(domain)}.txt"
+        normalized_query = sanitize_filename(user_query.replace(" ", "-").lower())
+        filename = f"{normalized_query}-{sanitize_filename(domain)}.txt"
         filepath = os.path.join(SAVE_DIR, filename)
 
         with open(filepath, "w", encoding="utf-8") as f:
             for key, value in meta_dict.items():
                 f.write(f"{key.upper()}: {value}\n")
+
         print(f"✅ Файл реально сохранён по пути: {filepath}")
         return filepath
     except Exception as e:
