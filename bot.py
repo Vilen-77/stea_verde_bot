@@ -9,7 +9,6 @@ from telegram.ext import (
     filters
 )
 from openai import OpenAI
-import asyncio
 
 # Загрузка переменных окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -114,8 +113,8 @@ async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"⚠️ Ошибка: {e}")
 
-# Асинхронный запуск бота
-async def main():
+# Запуск бота
+if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -123,11 +122,4 @@ async def main():
     app.add_handler(CommandHandler("serp", serp))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, assistant))
 
-    # Удаляем возможный старый webhook (иначе Telegram конфликтует)
-    await app.bot.delete_webhook(drop_pending_updates=True)
-
-    # Запускаем polling
-    await app.run_polling()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    app.run_polling(stop_signals=None)
