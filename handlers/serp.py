@@ -53,12 +53,20 @@ async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         message = "📄 *Топ результатов:*\n\n"
+        
+       
 
 
         for idx, res in enumerate(results, start=1):
             title = res.get("title", f"Результат {idx}")
             link = res.get("link", "")
             message += f"• [{title}]({link})\n"
+            
+            print(f"🌐 Парсю ссылку: {link}")
+            meta = fetch_meta(link)
+            print(f"🧠 META: {meta}")
+            save_raw_meta(query, meta)
+  
 
             # Извлекаем и сохраняем мета-данные без обработки
             meta = fetch_meta(link)
