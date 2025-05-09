@@ -62,6 +62,16 @@ async def telegram_webhook(request: Request):
 
 print("✅ Бот запущен через Webhook")
 
+from fastapi.responses import PlainTextResponse
+
+@app.get("/cache", response_class=PlainTextResponse)
+async def list_cache_files():
+    try:
+        files = os.listdir("serp_cache")
+        return "\n".join(files) if files else "📭 Папка serp_cache пуста."
+    except Exception as e:
+        return f"❌ Ошибка при чтении папки: {e}"
+
 # Обязательный запуск через uvicorn для Render Web Service
 if __name__ == "__main__":
     import uvicorn
