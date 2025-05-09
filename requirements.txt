@@ -4,3 +4,4 @@ requests
 serpapi
 fastapi
 uvicorn
+beautifulsoup4
