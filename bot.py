@@ -51,20 +51,15 @@ async def on_startup():
     await tg_app.bot.set_webhook(url=WEBHOOK_URL)
 
 # Обработка входящих сообщений от Telegram
-@app.post(WEBHOOK_PATH)
+@app.post("/webhook")
 async def telegram_webhook(request: Request):
-    print("🧪 Вызван обработчик /webhook")
     try:
-        update_data = await request.json()
-        print("📥 Получен webhook от Telegram!")
-        print(json.dumps(update_data, indent=2))
-
-        update = Update.de_json(update_data, tg_app.bot)
-        await tg_app.update_queue.put(update)
-
+        body = await request.body()
+        print("📥 Пришёл raw webhook:", body[:200])
         return {"status": "ok"}
     except Exception as e:
-        print("❌ Ошибка при обработке webhook:", str(e))
+        print("❌ Ошибка чтения webhook:", e)
         return {"status": "error", "message": str(e)}
+
 
 print("✅ Бот запущен через Webhook")
