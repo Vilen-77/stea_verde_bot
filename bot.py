@@ -1,3 +1,9 @@
+import os
+import requests
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from openai import OpenAI
+
 async def serp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     base_count = 5
