@@ -2,9 +2,9 @@ from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes
 import os
 import requests
-import shutil
 from handlers.meta_extractor import save_raw_meta_from_serp
 from handlers.serp_table_builder import generate_serp_table
+import shutil
 
 # Получаем ключ из переменных окружения
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
@@ -27,6 +27,17 @@ def parse_serp_args(args):
             query_parts.append(arg)
 
     return ' '.join(query_parts), count, lang, region
+
+# Очистка кэша
+def clear_serp_cache():
+    folder = "serp_cache"
+    if os.path.exists(folder):
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"❌ Не удалось удалить {file_path}: {e}")
 
 # Команда /serp
 async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -62,21 +73,15 @@ async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             snippet = res.get("snippet", "")
 
             message += f"• [{title}]({link})\n"
-
-            print(f"🌐 Парсю ссылку: {link}")
+            print(f"🌐 Сохраняю SERP-мета: {link}")
             save_raw_meta_from_serp(query, link, title, snippet)
 
         await update.message.reply_text(message, parse_mode="Markdown", disable_web_page_preview=True)
 
-        # Построение и отправка CSV
         table_path = generate_serp_table()
-        if table_path:
-            with open(table_path, "rb") as f:
-                await context.bot.send_document(chat_id=update.effective_chat.id, document=f, filename="serp_result.csv")
+        await update.message.reply_document(document=open(table_path, "rb"))
 
-        # Очистка кэша
-        shutil.rmtree("serp_cache", ignore_errors=True)
-        os.makedirs("serp_cache", exist_ok=True)
+        clear_serp_cache()
 
     except Exception as e:
         print("❌ Ошибка запроса к SerpAPI:", e)
