@@ -52,8 +52,8 @@ async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Результаты не найдены.")
             return
 
-        message = "📄 *Топ результатов:*
-\n"
+        message = "📄 *Топ результатов:*\n\n"
+
 
         for idx, res in enumerate(results, start=1):
             title = res.get("title", f"Результат {idx}")
