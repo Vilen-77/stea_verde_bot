@@ -36,16 +36,23 @@ async def on_startup():
     await tg_app.bot.set_webhook(url=WEBHOOK_URL)
 
 # Упрощённый webhook для отладки
+from telegram import Update
+
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     print("🧪 Вход в обработчик /webhook")
     try:
-        body = await request.body()
-        print("📥 Пришёл raw webhook (байты):", body[:300])
+        update_data = await request.json()
+        print("📥 Получен JSON:", json.dumps(update_data, indent=2))
+
+        update = Update.de_json(update_data, tg_app.bot)
+        await tg_app.update_queue.put(update)
+
         return {"status": "ok"}
     except Exception as e:
-        print("❌ Ошибка чтения webhook:", str(e))
+        print("❌ Ошибка при обработке webhook:", str(e))
         return {"status": "error", "message": str(e)}
+
 
 print("✅ Бот запущен через Webhook")
 
