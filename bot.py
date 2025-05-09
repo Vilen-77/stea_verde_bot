@@ -42,7 +42,9 @@ async def on_startup():
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
     data = await request.body()
+    print("📥 Получен webhook от Telegram!")
     await tg_app.update_queue.put(data)
     return {"status": "ok"}
+
 
 print("✅ Бот запущен через Webhook")
