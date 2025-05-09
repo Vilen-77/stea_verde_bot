@@ -8,7 +8,7 @@ from handlers.start import handler as start_handler
 # from handlers.serp_fetch import handler as serp_handler
 # from handlers.stats import handler as stats_handler
 # from handlers.admin import handler as admin_handler
-# from handlers.assistant import handler as assistant_handler
+from handlers.assistant import handler as assistant_handler
 
 # Получаем переменные окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -30,7 +30,7 @@ tg_app.add_handler(start_handler)
 # tg_app.add_handler(serp_handler)
 # tg_app.add_handler(stats_handler)
 # tg_app.add_handler(admin_handler)
-# tg_app.add_handler(assistant_handler)
+tg_app.add_handler(assistant_handler)
 
 # При старте сервера — Telegram настраивает Webhook
 @app.on_event("startup")
