@@ -1,11 +1,11 @@
-import os
+""import os
 import json
 import requests
 from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, Application
 
-# Хендлеры — подключай по мере готовности
+# Хендлеры
 from handlers.start import handler as start_handler
 # from handlers.semantics import handler as semantics_handler
 # from handlers.serp_fetch import handler as serp_handler
@@ -44,6 +44,7 @@ async def on_startup():
 # Обработка входящих сообщений от Telegram
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
+    print("🧪 Вызван обработчик /webhook")
     try:
         update_data = await request.json()
         print("📥 Получен webhook от Telegram!")
@@ -54,7 +55,7 @@ async def telegram_webhook(request: Request):
 
         return {"status": "ok"}
     except Exception as e:
-        print("❌ Ошибка при обработке webhook:", e)
+        print("❌ Ошибка при обработке webhook:", str(e))
         return {"status": "error", "message": str(e)}
 
 print("✅ Бот запущен через Webhook")
