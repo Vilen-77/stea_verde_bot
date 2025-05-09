@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, ContextTypes
 import os
 import requests
-from handlers.meta_extractor import fetch_meta, save_raw_meta
+from handlers.meta_extractor import save_raw_meta_from_serp
 
 # Получаем ключ из переменных окружения
 SERPAPI_KEY = os.getenv("SERPAPI_KEY")
@@ -69,8 +69,12 @@ async def serp_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
   
 
             # Извлекаем и сохраняем мета-данные без обработки
-            meta = fetch_meta(link)
-            save_raw_meta(query, meta)
+            from handlers.meta_extractor import save_raw_meta_from_serp
+
+            title = res.get("title", "")
+            snippet = res.get("snippet", "")
+            save_raw_meta_from_serp(query, link, title, snippet)
+
 
         await update.message.reply_text(message, parse_mode="Markdown", disable_web_page_preview=True)
 
