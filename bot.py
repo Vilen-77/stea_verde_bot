@@ -4,21 +4,53 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from openai import OpenAI
 
+# Загрузка переменных окружения
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+
+# Инициализация OpenAI клиента
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+# Команда /start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Привет! Я stea_verde_bot 🤖. Напиши /semantics <тема>, и я сгенерирую семантическое ядро."
+    )
+
+# Команда /semantics <запрос>
+async def semantics(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = ' '.join(context.args)
+    if not query:
+        await update.message.reply_text("Пожалуйста, укажи ключевую фразу после /semantics.")
+        return
+
+    prompt = f"Сгенерируй список из 30 ключевых фраз по теме '{query}', раздели их по интенту (информационные, коммерческие, транзакционные) и оформи списком."
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        result = response.choices[0].message.content.strip()
+        await update.message.reply_text(result)
+
+    except Exception as e:
+        await update.message.reply_text(f"Ошибка: {str(e)}")
+
+# Команда /serp <ключ> [+N]
 async def serp(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
-    base_count = 5
-    max_count = 20
-    extra_count = 0
+    count = 5  # по умолчанию
     query_parts = []
 
     for arg in args:
         if arg.startswith('+') and arg[1:].isdigit():
-            extra_count += int(arg[1:])
+            count += int(arg[1:])
         else:
             query_parts.append(arg)
 
-    total_count = min(base_count + extra_count, max_count)
-    query = ' '.join(query_parts).strip()
+    query = ' '.join(query_parts)
 
     if not query:
         await update.message.reply_text("Пожалуйста, укажи запрос после /serp")
@@ -26,7 +58,6 @@ async def serp(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"🔎 Ищу результаты в Google по: *{query}* ...", parse_mode="Markdown")
 
-    # Запрос к SerpApi
     params = {
         "engine": "google",
         "q": query,
@@ -43,9 +74,9 @@ async def serp(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Не удалось получить результаты.")
             return
 
-        results = data["organic_results"][:total_count]
+        results = data["organic_results"][:count]  # динамическое количество
 
-        message = f"📄 *Топ-{len(results)} результатов Google:*\n\n"
+        message = "📄 *Топ-результаты Google:*\n\n"
         for res in results:
             title = res.get("title", "Без заголовка")
             link = res.get("link", "")
@@ -55,3 +86,14 @@ async def serp(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         await update.message.reply_text(f"⚠️ Ошибка при запросе: {e}")
+
+# Запуск бота
+def main():
+    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("semantics", semantics))
+    app.add_handler(CommandHandler("serp", serp))
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
