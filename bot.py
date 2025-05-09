@@ -21,4 +21,4 @@ if __name__ == "__main__":
     app.add_handler(assistant_handler)
 
     print("✅ Бот запущен. Ожидаю команды в Telegram...")
-    app.run_polling(stop_signals=None)
+    #app.run_polling(stop_signals=None)
