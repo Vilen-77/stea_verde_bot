@@ -5,8 +5,14 @@ from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, Application
 
-print("📦 TELEGRAM_TOKEN:", TELEGRAM_TOKEN[:10], "...")
-print("🌐 RENDER_EXTERNAL_HOSTNAME:", RENDER_EXTERNAL_HOSTNAME)
+# Получаем переменные окружения
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+
+# ✅ Вставляем отладочный вывод
+print("📦 TELEGRAM_TOKEN:", TELEGRAM_TOKEN[:10] if TELEGRAM_TOKEN else "❌ None", "...")
+print("🌐 RENDER_EXTERNAL_HOSTNAME:", RENDER_EXTERNAL_HOSTNAME or "❌ None")
+
 
 # Хендлеры
 from handlers.start import handler as start_handler
