@@ -10,7 +10,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 def fetch_meta(url):
     def fetch_meta(url):
-    print(f"📄 Получаю мета-данные с: {url}")
+        print(f"📄 Получаю мета-данные с: {url}")
     try:
         ...
 
@@ -48,8 +48,8 @@ def sanitize_filename(text):
 
 def save_raw_meta(user_query, meta_dict):
     def save_raw_meta(user_query, meta_dict):
-    print(f"💾 Сохраняю файл для запроса: {user_query}")
-    print(f"→ META: {meta_dict}")
+        print(f"💾 Сохраняю файл для запроса: {user_query}")
+        print(f"→ META: {meta_dict}")
     try:
         ...
 
