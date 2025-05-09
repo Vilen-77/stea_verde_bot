@@ -19,6 +19,26 @@ SERPAPI_KEY = os.getenv("SERPAPI_KEY")
 # Инициализация OpenAI клиента
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+# Ассистент OpenAI 
+async def assistant(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_text = update.message.text
+
+    prompt = (
+        f"Ты — AI-помощник внутри Telegram-бота по работе с ключевыми словами, SEO и SERP. "
+        f"Отвечай дружелюбно, чётко и понятно. Вот вопрос пользователя:\n\n{user_text}"
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        result = response.choices[0].message.content.strip()
+        await update.message.reply_text(result)
+
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ Ошибка: {e}")
+
 # Команда /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -101,6 +121,7 @@ def main():
     app.add_handler(CommandHandler("semantics", semantics))
     app.add_handler(CommandHandler("serp", serp))
     app.run_polling()
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, assistant))
 
 if __name__ == "__main__":
     main()
