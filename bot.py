@@ -1,5 +1,5 @@
 from telegram.ext import ApplicationBuilder
-from handlers.start import handler as start_handler
+#from handlers.start import handler as start_handler
 #from handlers.semantics import handler as semantics_handler
 #from handlers.serp_fetch import handler as serp_handler
 #from handlers.stats import handler as stats_handler
@@ -13,7 +13,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
-    app.add_handler(start_handler)
+    #app.add_handler(start_handler)
     #app.add_handler(semantics_handler)
     #app.add_handler(serp_handler)
     #app.add_handler(stats_handler)
