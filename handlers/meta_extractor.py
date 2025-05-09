@@ -9,11 +9,7 @@ SAVE_DIR = "serp_cache"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 def fetch_meta(url):
-    def fetch_meta(url):
-        print(f"📄 Получаю мета-данные с: {url}")
-    try:
-        ...
-
+    print(f"📄 Получаю мета-данные с: {url}")
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         resp = requests.get(url, headers=headers, timeout=10)
@@ -41,18 +37,21 @@ def fetch_meta(url):
 
     except Exception as e:
         print(f"❌ Ошибка при получении мета-данных с {url}: {e}")
-        return {"url": url, "title": "", "description": "", "keywords": "", "og_title": "", "og_description": ""}
+        return {
+            "url": url,
+            "title": "",
+            "description": "",
+            "keywords": "",
+            "og_title": "",
+            "og_description": ""
+        }
 
 def sanitize_filename(text):
     return re.sub(r"[^a-zA-Z0-9_-]", "_", text)[:50]
 
 def save_raw_meta(user_query, meta_dict):
-    def save_raw_meta(user_query, meta_dict):
-        print(f"💾 Сохраняю файл для запроса: {user_query}")
-        print(f"→ META: {meta_dict}")
-    try:
-        ...
-
+    print(f"💾 Сохраняю файл для запроса: {user_query}")
+    print(f"→ META: {meta_dict}")
     try:
         domain = urlparse(meta_dict["url"]).netloc.replace("www.", "")
         main_kw = user_query.split()[0].lower()
