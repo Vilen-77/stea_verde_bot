@@ -33,7 +33,11 @@ async def on_startup():
     print("📦 TELEGRAM_TOKEN:", TELEGRAM_TOKEN[:10] if TELEGRAM_TOKEN else "❌ None", "...")
     print("🌐 RENDER_EXTERNAL_HOSTNAME:", RENDER_EXTERNAL_HOSTNAME or "❌ None")
     print("🚀 Устанавливаю webhook:", WEBHOOK_URL)
+
+    await tg_app.initialize()
+    await tg_app.start()
     await tg_app.bot.set_webhook(url=WEBHOOK_URL)
+
 
 #  webhook
 @app.post(WEBHOOK_PATH)
