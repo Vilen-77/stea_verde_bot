@@ -7,6 +7,14 @@ from openai import OpenAI
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+# Загрузка шаблона prompt из файла
+PROMPT_TEMPLATE_PATH = "prompts/prompt_semantics.txt"
+if os.path.exists(PROMPT_TEMPLATE_PATH):
+    with open(PROMPT_TEMPLATE_PATH, "r", encoding="utf-8") as f:
+        PROMPT_TEMPLATE = f.read()
+else:
+    PROMPT_TEMPLATE = "Сгенерируй список из 30 ключевых фраз по теме '{query}', раздели их по интенту (информационные, коммерческие, транзакционные) и оформи списком."
+
 # Основная логика команды /semantics
 async def semantics_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = ' '.join(context.args)
@@ -14,9 +22,9 @@ async def semantics_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Пожалуйста, укажи тему после /semantics.")
         return
 
-    prompt = f"Сгенерируй список из 30 ключевых фраз по теме '{query}', раздели их по интенту (информационные, коммерческие, транзакционные) и оформи списком."
+    prompt = PROMPT_TEMPLATE.replace("{query}", query)
 
-    await update.message.reply_text("✍️ Генерирую ключевые фразы... Подождите пару секунд...")
+    await update.message.reply_text(f"✍️ Генерирую ключевые фразы по теме: {query}...")
 
     try:
         response = client.chat.completions.create(
