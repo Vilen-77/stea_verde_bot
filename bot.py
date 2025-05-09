@@ -8,6 +8,7 @@ from telegram.ext import ApplicationBuilder, Application
 # Хендлеры
 from handlers.start import handler as start_handler
 from handlers.assistant import handler as assistant_handler
+from handlers.semantics import handler as semantics_handler
 
 # Получаем переменные окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -26,6 +27,7 @@ tg_app: Application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 # Подключаем хендлеры
 tg_app.add_handler(start_handler)
 tg_app.add_handler(assistant_handler)
+tg_app.add_handler(semantics_handler)
 
 # При старте сервера — Telegram настраивает Webhook
 @app.on_event("startup")
