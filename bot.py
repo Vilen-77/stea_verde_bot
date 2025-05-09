@@ -1,5 +1,8 @@
 import os
+import json
+import requests
 from fastapi import FastAPI, Request
+from telegram import Update
 from telegram.ext import ApplicationBuilder, Application
 
 # Хендлеры — подключай по мере готовности
@@ -41,10 +44,17 @@ async def on_startup():
 # Обработка входящих сообщений от Telegram
 @app.post(WEBHOOK_PATH)
 async def telegram_webhook(request: Request):
-    data = await request.body()
-    print("📥 Получен webhook от Telegram!")
-    await tg_app.update_queue.put(data)
-    return {"status": "ok"}
+    try:
+        update_data = await request.json()
+        print("📥 Получен webhook от Telegram!")
+        print(json.dumps(update_data, indent=2))
 
+        update = Update.de_json(update_data, tg_app.bot)
+        await tg_app.update_queue.put(update)
+
+        return {"status": "ok"}
+    except Exception as e:
+        print("❌ Ошибка при обработке webhook:", e)
+        return {"status": "error", "message": str(e)}
 
 print("✅ Бот запущен через Webhook")
