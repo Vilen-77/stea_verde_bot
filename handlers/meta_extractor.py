@@ -61,7 +61,7 @@ def save_raw_meta(user_query, meta_dict):
         with open(filepath, "w", encoding="utf-8") as f:
             for key, value in meta_dict.items():
                 f.write(f"{key.upper()}: {value}\n")
-
+        print(f"✅ Файл реально сохранён по пути: {filepath}")
         return filepath
     except Exception as e:
         print(f"❌ Ошибка при сохранении файла: {e}")
