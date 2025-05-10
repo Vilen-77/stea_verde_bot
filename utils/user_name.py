@@ -1,5 +1,7 @@
 import os
 from datetime import datetime
+from telegram import Update
+from telegram.ext import CommandHandler, ContextTypes
 
 # Файл для логирования пользователей
 LOG_FILE = "user_logs.txt"
@@ -35,3 +37,23 @@ def is_user_allowed(username: str) -> bool:
     except Exception as e:
         print(f"❌ Ошибка при проверке прав пользователя: {e}")
         return False
+
+
+async def download_log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Команда /getlog — отправка файла с логами (только для Vilen77)
+    """
+    user = update.effective_user
+    if user.username != "Vilen77":
+        await update.message.reply_text("⛔ У Вас нет прав для этой команды.")
+        return
+
+    if not os.path.exists(LOG_FILE):
+        await update.message.reply_text("📭 Лог-файл пока пуст или отсутствует.")
+        return
+
+    await update.message.reply_document(document=open(LOG_FILE, "rb"), filename="user_logs.txt")
+
+
+# Хендлер команды /getlog
+getlog_handler = CommandHandler("getlog", download_log_command)
