@@ -56,4 +56,5 @@ async def download_log_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 # Хендлер команды /getlog
-getlog_handler = CommandHandler("getlog", download_log_command)
+log_handler = CommandHandler("getlog", download_log_command)
+
